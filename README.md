@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://health.ascratech.com">
-    <img src="https://github.com/Ascra-Tech/ascra_healthcare/blob/develop/kea-features.png" height="128" alt="Ascra Helathcare" />
+    <img src="" height="128" alt="Ascra Helathcare" />
   </a>
   <h2>Ascra Healthcare</h2>
   <p align="center">
@@ -18,7 +18,7 @@ Ascra Healthcare enables the Healthcare domain in ERPNext and has various featur
 
 ### Key Features
 
-![Key Features](#)
+![Key Features](https://github.com/Ascra-Tech/ascra_healthcare/blob/develop/kea-features.png)
 
 Key feature sets include Patient management, Outpatient / Inpatient management, Clinical Procedures, Rehabilitation and Physiotherapy, Laboratory management etc. and supports configuring multiple Medical Code Standards. It allows mapping any healthcare facility as Service Units and specialities as Medical Departments.
 
