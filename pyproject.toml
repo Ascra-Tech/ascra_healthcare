@@ -2,7 +2,7 @@
 name = "healthcare"
 description = "Modern, Open Source HIS built on Frappe and ERPNext"
 authors = [
-    { name = "earthians Health Informatics Pvt. Ltd.", email = "info@earthianslive.com" },
+    { name = "Ascra Technologies LLP", email = "connect@ascratech.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10"
