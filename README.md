@@ -1,19 +1,13 @@
 <div align="center">
-<a href="https://frappehealth.com">
-    <img src="https://raw.githubusercontent.com/frappe/healthcare/develop/healthcare/public/images/healthcare.svg" height="128" alt="Marley Health Logo">
+<a href="https://health.ascratech.com">
+    <img src="#" height="128" alt="Marley Health Logo">
   </a>
-  <h2>Marley Health</h2>
+  <h2>Ascra Healthcare</h2>
   <p align="center">
-    <p>Open source & easy-to-use hospital information system(HIS) for all healthcare organisations.</p>
+    <p>Ascra Healthcare open Source, Enterprise and Modern Health Information System.</p>
   </p>
 
-  [Marley Health](https://marleyhealth.io)
-
- <div align="center" style="max-height: 40px;">
-    <a href="https://frappecloud.com/marley/signup">
-        <img src=".github/try-on-f-cloud-button.svg" height="40">
-    </a>
- </div>
+  [Ascra Healthcare](https://health.ascratech.com)
 
 </div>
 
