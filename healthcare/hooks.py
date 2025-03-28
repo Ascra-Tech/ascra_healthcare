@@ -309,3 +309,22 @@ treeviews = [
 company_data_to_be_ignored = [
 	"Healthcare Service Unit",
 ]
+
+fixtures = [
+    #"Role",
+    #"Role Profile",
+    #"Client Script",
+    #"Server Script",
+    #"Tax Category",
+    "Workspace",
+    #"Custom HTML Block",
+    #"Custom DocPerm",
+    #"Workflow",
+    #"Workflow State",
+    #"Workflow Action",
+    #"Print Format",
+    #"Number Card",
+    #"Report",
+    #"Workflow Action Master",
+    #"Module Profile",
+]
