@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://health.ascratech.com">
-    <img src="#" height="128" alt="Ascra Helathcare" />
+    <img src="https://github.com/Ascra-Tech/ascra_healthcare/blob/develop/kea-features.png" height="128" alt="Ascra Helathcare" />
   </a>
   <h2>Ascra Healthcare</h2>
   <p align="center">
