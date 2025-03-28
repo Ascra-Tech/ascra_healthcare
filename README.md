@@ -18,7 +18,7 @@ Ascra Healthcare enables the Healthcare domain in ERPNext and has various featur
 
 ### Key Features
 
-![Key Features](https://raw.githubusercontent.com/frappe/health/develop/key-features.png)
+![Key Features](#)
 
 Key feature sets include Patient management, Outpatient / Inpatient management, Clinical Procedures, Rehabilitation and Physiotherapy, Laboratory management etc. and supports configuring multiple Medical Code Standards. It allows mapping any healthcare facility as Service Units and specialities as Medical Departments.
 
