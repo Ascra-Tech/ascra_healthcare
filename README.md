@@ -13,7 +13,7 @@
 
 ### Introduction
 
-Marley Health enables the health domain in ERPNext and has various features that will help healthcare practitioners, clinics and hospitals to leverage the power of Frappe and ERPNext. It is built on Frappe, a full-stack, meta-data driven, web framework, and integrates seamlessly with ERPNext, the most agile ERP software. Marley Health helps to manage healthcare workflows efficiently and most of the design is based on HL7 FHIR (Fast Health Interoperability Resources).
+Ascra Healthcare enables the Healthcare domain in ERPNext and has various features that will help Healthcare practitioners, clinics and hospitals to leverage the power of Frappe and ERPNext. It is built on Frappe, a full-stack, meta-data driven, web framework, and integrates seamlessly with ERPNext, the most agile ERP software. Ascra Healthcare helps to manage Healthcarecare workflows efficiently and most of the design is based on HL7 FHIR (Fast Healthcare  Interoperability Resources).
 
 
 ### Key Features
@@ -44,14 +44,10 @@ $ bench --site demo.com install-app healthcare
 
 ### Documentation
 
-Complete documentation for Marley Health is available at https://marleyhealth.io/docs
+Complete documentation for Ascra Healthcare  is available at https://health.ascratech.com/docs
 
-
-### License
-
-GNU GPL V3. See [license.txt](https://github.com/earthians/marley/blob/develop/license.txt) for more information.
 
 
 ### Credits
 
-Marley Health module is developed & maintained by [earthians](https://earthianslive.com) and community contributors.
+Ascra Healthcare  module is developed & maintained by [Ascra Technologies](https://ascratech.com).
