@@ -32,7 +32,7 @@ Using bench, [install ERPNext](https://github.com/frappe/bench#installation) as 
 Once ERPNext is installed, add health app to your bench by running
 
 ```sh
-$ bench get-app healthcare
+$ bench get-app --branch branch-name https://github.com/Ascra-Tech/ascra_healthcare.git
 ```
 
 After that, you can install health app on required site by running
