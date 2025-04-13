@@ -65,32 +65,36 @@ def get_item_details(args=None):
 
 
 def create_item_from_template(doc):
-	disabled = doc.disabled
-	if doc.is_billable and not doc.disabled:
-		disabled = 0
+    disabled = doc.disabled
+    if doc.is_billable and not doc.disabled:
+        disabled = 0
 
-	uom = frappe.db.exists("UOM", "Unit") or frappe.db.get_single_value("Stock Settings", "stock_uom")
-	item = frappe.get_doc(
-		{
-			"doctype": "Item",
-			"item_code": doc.item_code,
-			"item_name": doc.template,
-			"item_group": doc.item_group,
-			"description": doc.description,
-			"is_sales_item": 1,
-			"is_service_item": 1,
-			"is_purchase_item": 0,
-			"is_stock_item": 0,
-			"show_in_website": 0,
-			"is_pro_applicable": 0,
-			"disabled": disabled,
-			"stock_uom": uom,
-		}
-	).insert(ignore_permissions=True, ignore_mandatory=True)
-
-	make_item_price(item.name, doc.rate)
-	doc.db_set("item", item.name)
-
+    uom = frappe.db.exists("UOM", "Unit") or frappe.db.get_single_value("Stock Settings", "stock_uom")
+    
+    # Create the item data dict with the correct fields for your version
+    item_data = {
+        "doctype": "Item",
+        "item_code": doc.item_code,
+        "item_name": doc.template,
+        "item_group": doc.item_group,
+        "description": doc.description,
+        "is_sales_item": 1,
+        "is_purchase_item": 0,
+        "is_stock_item": 0,  # For services, stock item should be 0
+        "show_in_website": 0,
+        "disabled": disabled,
+        "stock_uom": uom,
+    }
+    
+    # Add GST HSN code from the template
+    if hasattr(doc, 'gst_hsn_code') and doc.gst_hsn_code:
+        item_data["gst_hsn_code"] = doc.gst_hsn_code
+    
+    # Create the item
+    item = frappe.get_doc(item_data).insert(ignore_permissions=True, ignore_mandatory=True)
+    
+    make_item_price(item.name, doc.rate)
+    doc.db_set("item", item.name)
 
 def make_item_price(item, item_price):
 	price_list_name = frappe.db.get_value(
