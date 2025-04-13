@@ -60,6 +60,11 @@ class PatientAppointment(Document):
 		send_confirmation_msg(self)
 		self.insert_calendar_event()
 
+		if self.service_request:
+			frappe.db.set_value(
+				"Service Request", self.service_request, "status", "completed-Request Status"
+			)
+
 	def set_title(self):
 		if self.practitioner:
 			self.title = _("{0} with {1}").format(
@@ -508,6 +513,11 @@ def get_appointment_item(appointment_doc, item):
 
 def cancel_appointment(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)
+	if appointment.service_request:
+		frappe.db.set_value(
+			"Service Request", appointment.service_request, "status", "active-Request Status"
+		)
+
 	if appointment.invoiced:
 		sales_invoice = check_sales_invoice_exists(appointment)
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
@@ -902,53 +912,3 @@ def update_appointment_status():
 		appointment_doc = frappe.get_doc("Patient Appointment", appointment.name)
 		appointment_doc.set_status()
 		appointment_doc.save()
-		
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_service_units_by_appointment_type(doctype, txt, searchfield, start, page_len, filters):
-    """
-    This function fetches service units associated with a specific appointment type
-    from the Appointment Type Service Item child table.
-    
-    Args:
-        doctype (str): The doctype being searched (Healthcare Service Unit)
-        txt (str): The search text entered by the user
-        searchfield (str): The field being searched
-        start (int): The starting index for pagination
-        page_len (int): The number of results per page
-        filters (dict): The filters applied to the search
-            - appointment_type: The selected appointment type
-            - company: The selected company
-    
-    Returns:
-        list: List of service units that match the criteria
-    """
-    appointment_type = filters.get('appointment_type')
-    company = filters.get('company')
-    
-    if not appointment_type:
-        return []
-    
-    # Get all service units linked to this appointment type through the child table
-    service_units = frappe.db.sql("""
-        SELECT hsu.name, hsu.healthcare_service_unit_name
-        FROM `tabHealthcare Service Unit` hsu
-        INNER JOIN `tabAppointment Type Service Item` atsi
-        ON atsi.dt = 'Healthcare Service Unit' AND atsi.dn = hsu.name
-        WHERE atsi.parent = %s
-        AND hsu.company = %s
-        AND hsu.is_group = 0
-        AND hsu.allow_appointments = 1
-        AND (hsu.name LIKE %s OR hsu.healthcare_service_unit_name LIKE %s)
-        ORDER BY hsu.healthcare_service_unit_name
-        LIMIT %s, %s
-    """, (
-        appointment_type,
-        company,
-        "%%%s%%" % txt,
-        "%%%s%%" % txt,
-        start,
-        page_len
-    ), as_list=1)
-    
-    return service_units
