@@ -33,16 +33,8 @@ frappe.ui.form.on('Patient Appointment', {
 			}
 		});
 
-		frm.set_query('service_unit', function() {
-			return {
-				query: 'healthcare.controllers.queries.get_healthcare_service_units',
-				filters: {
-					company: frm.doc.company,
-					inpatient_record: frm.doc.inpatient_record,
-					allow_appointments: 1,
-				}
-			};
-		});
+		// Custom logic for service unit filtering based on appointment type
+		setupServiceUnitFilter(frm);
 
 		frm.set_query('therapy_plan', function() {
 			return {
@@ -132,6 +124,20 @@ frappe.ui.form.on('Patient Appointment', {
 		}
 
 		frm.trigger("make_invoice_button");
+	},
+
+	appointment_type: function(frm) {
+		if (frm.doc.appointment_type) {
+			if (frm.doc.appointment_for && frm.doc[frappe.scrub(frm.doc.appointment_for)]) {
+				frm.events.set_payment_details(frm);
+			}
+			
+			// Clear service unit when appointment type changes
+			frm.set_value('service_unit', '');
+			
+			// Apply filter to service unit based on appointment type
+			setupServiceUnitFilter(frm);
+		}
 	},
 
 	make_invoice_button: function (frm) {
@@ -252,14 +258,6 @@ frappe.ui.form.on('Patient Appointment', {
 		}
 	},
 
-	appointment_type: function(frm) {
-		if (frm.doc.appointment_type) {
-			if (frm.doc.appointment_for && frm.doc[frappe.scrub(frm.doc.appointment_for)]) {
-				frm.events.set_payment_details(frm);
-			}
-		}
-	},
-
 	department: function(frm) {
 		if (frm.doc.department && frm.doc.appointment_for == 'Department') {
 			frm.events.set_payment_details(frm);
@@ -374,6 +372,24 @@ frappe.ui.form.on('Patient Appointment', {
 		}
 	}
 });
+
+// Function to setup service unit filter based on appointment type
+function setupServiceUnitFilter(frm) {
+    if (!frm.doc.appointment_type || !frm.doc.company) {
+        return;
+    }
+    
+    // Set up a dynamic query for the service unit field
+    frm.set_query('service_unit', function() {
+        return {
+            query: "healthcare.healthcare.doctype.patient_appointment.patient_appointment.get_service_units_by_appointment_type",
+            filters: {
+                'appointment_type': frm.doc.appointment_type,
+                'company': frm.doc.company
+            }
+        };
+    });
+}
 
 let check_and_set_availability = function(frm) {
 	let selected_slot = null;
