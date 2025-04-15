@@ -829,41 +829,67 @@ def send_message(doc, message):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	"""Returns events for Gantt / Calendar view rendering.
-
-	:param start: Start date-time.
-	:param end: End date-time.
-	:param filters: Filters (JSON).
-	"""
-	from frappe.desk.calendar import get_event_conditions
-
-	conditions = get_event_conditions("Patient Appointment", filters)
-
-	data = frappe.db.sql(
-		"""
-		select
-		`tabPatient Appointment`.name, `tabPatient Appointment`.patient,
-		`tabPatient Appointment`.practitioner, `tabPatient Appointment`.status,
-		`tabPatient Appointment`.duration,
-		timestamp(`tabPatient Appointment`.appointment_date, `tabPatient Appointment`.appointment_time) as 'start',
-		`tabAppointment Type`.color
-		from
-		`tabPatient Appointment`
-		left join `tabAppointment Type` on `tabPatient Appointment`.appointment_type=`tabAppointment Type`.name
-		where
-		(`tabPatient Appointment`.appointment_date between %(start)s and %(end)s)
-		and `tabPatient Appointment`.status != 'Cancelled' and `tabPatient Appointment`.docstatus < 2 {conditions}""".format(
-			conditions=conditions
-		),
-		{"start": start, "end": end},
-		as_dict=True,
-		update={"allDay": 0},
-	)
-
-	for item in data:
-		item.end = item.start + datetime.timedelta(minutes=item.duration)
-
-	return data
+    """Returns events for Gantt / Calendar view rendering."""
+    from frappe.desk.calendar import get_event_conditions
+    
+    conditions = get_event_conditions("Patient Appointment", filters)
+    
+    data = frappe.db.sql(
+        """
+        select
+        `tabPatient Appointment`.name, `tabPatient Appointment`.patient,
+        `tabPatient Appointment`.practitioner, `tabPatient Appointment`.practitioner_name,
+        `tabPatient Appointment`.department, `tabPatient Appointment`.service_unit,
+        `tabPatient Appointment`.status, `tabPatient Appointment`.duration, 
+        `tabPatient Appointment`.appointment_type, `tabPatient Appointment`.appointment_for,
+        `tabPatient Appointment`.invoiced,
+        timestamp(`tabPatient Appointment`.appointment_date, `tabPatient Appointment`.appointment_time) as 'start',
+        `tabAppointment Type`.color
+        from
+        `tabPatient Appointment`
+        left join `tabAppointment Type` on `tabPatient Appointment`.appointment_type=`tabAppointment Type`.name
+        where
+        (`tabPatient Appointment`.appointment_date between %(start)s and %(end)s)
+        and `tabPatient Appointment`.status != 'Cancelled' and `tabPatient Appointment`.docstatus < 2 {conditions}""".format(
+            conditions=conditions
+        ),
+        {"start": start, "end": end},
+        as_dict=True,
+        update={"allDay": 0},
+    )
+    
+    for item in data:
+        # Create a more comprehensive title with all requested information
+        title_parts = [item.patient]
+        
+        # Add appointment type
+        if item.appointment_type:
+            title_parts.append(item.appointment_type)
+        
+        # Add appointment for
+        if item.appointment_for:
+            title_parts.append(f"For: {item.appointment_for}")
+        
+        # Add provider info based on appointment_for
+        if item.appointment_for == "Practitioner" and item.practitioner_name:
+            title_parts.append(f"Dr: {item.practitioner_name}")
+        elif item.appointment_for == "Department" and item.department:
+            title_parts.append(f"Dept: {item.department}")
+        elif item.appointment_for == "Service Unit" and item.service_unit:
+            title_parts.append(f"Unit: {item.service_unit}")
+        
+        # Add invoice status
+        if item.invoiced:
+            title_parts.append("Invoiced")
+        
+        # Join all parts with a separator
+        item.title = " | ".join(title_parts)
+        
+        # Add a fallback duration if it's None
+        duration = item.duration or 15
+        item.end = item.start + datetime.timedelta(minutes=duration)
+    
+    return data
 
 
 @frappe.whitelist()
