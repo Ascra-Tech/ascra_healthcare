@@ -204,27 +204,38 @@ var make_list_row= function(columns, invoice_healthcare_services, result={}) {
 	return $row;
 };
 
-var set_primary_action= function(frm, dialog, $results, invoice_healthcare_services) {
-	var me = this;
-	dialog.set_primary_action(__('Add'), function() {
-		frm.clear_table('items');
-		let checked_values = get_checked_values($results);
-		if(checked_values.length > 0){
-			if(invoice_healthcare_services) {
-				frm.set_value("patient", dialog.fields_dict.patient.input.value);
-			}
-			add_to_item_line(frm, checked_values, invoice_healthcare_services);
-			dialog.hide();
-		}
-		else{
-			if(invoice_healthcare_services){
-				frappe.msgprint(__("Please select Healthcare Service"));
-			}
-			else{
-				frappe.msgprint(__("Please select Drug"));
-			}
-		}
-	});
+var set_primary_action = function(frm, dialog, $results, invoice_healthcare_services) {
+    var me = this;
+    dialog.set_primary_action(__('Add'), function() {
+        frm.clear_table('items');
+        let checked_values = get_checked_values($results);
+        if(checked_values.length > 0){
+            // Get the patient from the dialog
+            let selected_patient = dialog.get_value("patient");
+            
+            // Set the patient in the form
+            frm.set_value("patient", selected_patient);
+            
+            // At this point, the patient(frm) trigger will execute and set the customer automatically
+            // We just need to wait for it to finish, then add the items
+            setTimeout(function() {
+                if (frm.doc.customer) {
+                    add_to_item_line(frm, checked_values, invoice_healthcare_services);
+                    dialog.hide();
+                } else {
+                    frappe.msgprint(__("Patient {0} is not linked to a customer. Please select a customer before adding items.", [selected_patient]));
+                }
+            }, 500);
+        }
+        else{
+            if(invoice_healthcare_services){
+                frappe.msgprint(__("Please select Healthcare Service"));
+            }
+            else{
+                frappe.msgprint(__("Please select Drug"));
+            }
+        }
+    });
 };
 
 var get_checked_values= function($results) {
