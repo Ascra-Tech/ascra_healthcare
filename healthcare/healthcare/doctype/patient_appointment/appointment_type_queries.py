@@ -57,50 +57,6 @@ def get_service_units_by_appointment_type(doctype, txt, searchfield, start, page
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_practitioners_by_appointment_type(doctype, txt, searchfield, start, page_len, filters):
-    """
-    This function fetches practitioners associated with a specific appointment type
-    from the Appointment Type Service Item child table.
-    
-    Args:
-        doctype (str): The doctype being searched (Healthcare Practitioner)
-        txt (str): The search text entered by the user
-        searchfield (str): The field being searched
-        start (int): The starting index for pagination
-        page_len (int): The number of results per page
-        filters (dict): The filters applied to the search
-            - appointment_type: The selected appointment type
-    
-    Returns:
-        list: List of practitioners that match the criteria
-    """
-    appointment_type = filters.get('appointment_type')
-    
-    if not appointment_type:
-        return []
-    
-    # Get all practitioners linked to this appointment type through the child table
-    practitioners = frappe.db.sql("""
-        SELECT hp.name, CONCAT_WS(' ', COALESCE(hp.first_name, ''), COALESCE(hp.middle_name, ''), COALESCE(hp.last_name, '')) as practitioner_name
-        FROM `tabHealthcare Practitioner` hp
-        INNER JOIN `tabAppointment Type Service Item` atsi
-        ON atsi.dt = 'Healthcare Practitioner' AND atsi.dn = hp.name
-        WHERE atsi.parent = %s
-        AND (hp.name LIKE %s OR hp.first_name LIKE %s)
-        ORDER BY hp.first_name
-        LIMIT %s, %s
-    """, (
-        appointment_type,
-        "%%%s%%" % txt,
-        "%%%s%%" % txt,
-        cint(start),
-        cint(page_len)
-    ), as_list=1)
-    
-    return practitioners
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def get_departments_by_appointment_type(doctype, txt, searchfield, start, page_len, filters):
     """
     This function fetches departments associated with a specific appointment type
