@@ -84,79 +84,78 @@ var set_service_unit = function (frm) {
 };
 
 var get_healthcare_services_to_invoice = function(frm, link_customer) {
-    var me = this;
-    let selected_patient = '';
-    var dialog = new frappe.ui.Dialog({
-        title: __("Get Items from Healthcare Services"),
-        fields:[
-            {
-                fieldtype: 'Link',
-                options: 'Patient',
-                label: 'Patient',
-                fieldname: "patient",
-                reqd: true
-            },
-            { fieldtype: 'Section Break' },
-            { fieldtype: 'HTML', fieldname: 'results_area' }
-        ]
-    });
-    var $wrapper;
-    var $results;
-    var $placeholder;
-    
-    dialog.set_values({
-        'patient': frm.doc.patient
-    });
-    
-    // Trigger the API call immediately after dialog is set up with initial patient value
-    if (frm.doc.patient) {
-        selected_patient = frm.doc.patient;
-        var method = "healthcare.healthcare.utils.get_healthcare_services_to_invoice";
-        var args = {patient: selected_patient, customer: frm.doc.customer, company: frm.doc.company, link_customer: link_customer};
-        var columns = (["service", "reference_name", "reference_type"]);
-        
-        // Wait for the dialog to fully render before making the API call
-        setTimeout(function() {
-            get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
-        }, 300);
-    }
-    
-    dialog.fields_dict["patient"].df.onchange = () => {
-        var patient = dialog.get_value("patient");
-        if(patient && patient!=selected_patient){
-            selected_patient = patient;
-            
-            // Get customer linked to this patient before making the API call
-            frappe.db.get_value("Patient", patient, "customer")
-                .then(r => {
-                    let customer = r.message.customer || frm.doc.customer;
-                    var method = "healthcare.healthcare.utils.get_healthcare_services_to_invoice";
-                    var args = {patient: patient, customer: customer, company: frm.doc.company, link_customer: link_customer};
-                    var columns = (["service", "reference_name", "reference_type"]);
-                    get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
-                });
-        }
-        else if(!patient){
-            selected_patient = '';
-            $results.empty();
-            $results.append($placeholder);
-        }
-    }
-    $wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
-        style="border: 1px solid #d1d8dd; border-radius: 3px; height: 300px; overflow: auto;"></div>`);
-    $results = $wrapper.find('.results');
-    $placeholder = $(`<div class="multiselect-empty-state">
-                <span class="text-center" style="margin-top: -40px;">
-                    <i class="fa fa-2x fa-heartbeat text-extra-muted"></i>
-                    <p class="text-extra-muted">No billable Healthcare Services found</p>
-                </span>
-            </div>`);
-    $results.on('click', '.list-item--head :checkbox', (e) => {
-        $results.find('.list-item-container .list-row-check')
-            .prop("checked", ($(e.target).is(':checked')));
-    });
-    set_primary_action(frm, dialog, $results, true);
-    dialog.show();
+	var me = this;
+	let selected_patient = '';
+	var dialog = new frappe.ui.Dialog({
+		title: __("Get Items from Healthcare Services"),
+		fields:[
+			{
+				fieldtype: 'Link',
+				options: 'Patient',
+				label: 'Patient',
+				fieldname: "patient",
+				reqd: true
+			},
+			{ fieldtype: 'Section Break' },
+			{ fieldtype: 'HTML', fieldname: 'results_area' }
+		]
+	});
+	var $wrapper;
+	var $results;
+	var $placeholder;
+	dialog.set_values({
+		'patient': frm.doc.patient
+	});
+	
+	// Trigger the API call immediately after dialog is set up with initial patient value
+	if (frm.doc.patient) {
+		selected_patient = frm.doc.patient;
+		var method = "healthcare.healthcare.utils.get_healthcare_services_to_invoice";
+		var args = {patient: selected_patient, customer: frm.doc.customer, company: frm.doc.company, link_customer: link_customer};
+		var columns = (["service", "reference_name", "reference_type"]);
+		
+		// Wait for the dialog to fully render before making the API call
+		setTimeout(function() {
+			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
+		}, 300);
+	}
+	
+	dialog.fields_dict["patient"].df.onchange = () => {
+		var patient = dialog.get_value("patient");
+		if(patient && patient!=selected_patient){
+			selected_patient = patient;
+			
+			// Get customer linked to this patient before making the API call
+			frappe.db.get_value("Patient", patient, "customer")
+				.then(r => {
+					let customer = r.message.customer || frm.doc.customer;
+					var method = "healthcare.healthcare.utils.get_healthcare_services_to_invoice";
+					var args = {patient: patient, customer: customer, company: frm.doc.company, link_customer: link_customer};
+					var columns = (["service", "reference_name", "reference_type"]);
+					get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
+				});
+		}
+		else if(!patient){
+			selected_patient = '';
+			$results.empty();
+			$results.append($placeholder);
+		}
+	}
+	$wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
+		style="border: 1px solid #d1d8dd; border-radius: 3px; height: 300px; overflow: auto;"></div>`);
+	$results = $wrapper.find('.results');
+	$placeholder = $(`<div class="multiselect-empty-state">
+				<span class="text-center" style="margin-top: -40px;">
+					<i class="fa fa-2x fa-heartbeat text-extra-muted"></i>
+					<p class="text-extra-muted">No billable Healthcare Services found</p>
+				</span>
+			</div>`);
+	$results.on('click', '.list-item--head :checkbox', (e) => {
+		$results.find('.list-item-container .list-row-check')
+			.prop("checked", ($(e.target).is(':checked')));
+	});
+	set_primary_action(frm, dialog, $results, true);
+	dialog.show();
 };
 
 var get_healthcare_items = function(frm, invoice_healthcare_services, $results, $placeholder, method, args, columns) {
@@ -267,6 +266,7 @@ var get_checked_values= function($results) {
 var get_drugs_to_invoice = function(frm, link_customer) {
 	var me = this;
 	let selected_encounter = '';
+	let selected_patient = '';
 	var dialog = new frappe.ui.Dialog({
 		title: __("Get Items from Medication Requests"),
 		fields:[
@@ -294,14 +294,35 @@ var get_drugs_to_invoice = function(frm, link_customer) {
 		'patient': frm.doc.patient,
 		'encounter': ""
 	});
+	
+	// Save the initial patient value
+	if (frm.doc.patient) {
+		selected_patient = frm.doc.patient;
+	}
+	
+	dialog.fields_dict["patient"].df.onchange = () => {
+		var patient = dialog.get_value("patient");
+		if (patient != selected_patient) {
+			selected_patient = patient;
+			dialog.set_value("encounter", "");
+			selected_encounter = '';
+		}
+	};
+	
 	dialog.fields_dict["encounter"].df.onchange = () => {
 		var encounter = dialog.fields_dict.encounter.input.value;
 		if(encounter && encounter!=selected_encounter){
 			selected_encounter = encounter;
-			var method = "healthcare.healthcare.utils.get_drugs_to_invoice";
-			var args = {encounter: encounter, customer: frm.doc.customer, link_customer: link_customer};
-			var columns = (["drug_code", "quantity", "description"]);
-			get_healthcare_items(frm, false, $results, $placeholder, method, args, columns);
+			
+			// Get customer linked to this patient before making the API call
+			frappe.db.get_value("Patient", dialog.get_value("patient"), "customer")
+				.then(r => {
+					let customer = r.message.customer || frm.doc.customer;
+					var method = "healthcare.healthcare.utils.get_drugs_to_invoice";
+					var args = {encounter: encounter, customer: customer, link_customer: link_customer};
+					var columns = (["drug_code", "quantity", "description"]);
+					get_healthcare_items(frm, false, $results, $placeholder, method, args, columns);
+				});
 		}
 		else if(!encounter){
 			selected_encounter = '';
