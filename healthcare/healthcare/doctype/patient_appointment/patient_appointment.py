@@ -859,31 +859,30 @@ def get_events(start, end, filters=None):
     )
     
     for item in data:
-        # Create a more comprehensive title with all requested information
-        title_parts = [item.patient]
+        # Create a formatted title with multiple lines
+        patient_name = item.patient or "Unnamed"
+        title_lines = [patient_name]
         
         # Add appointment type
         if item.appointment_type:
-            title_parts.append(item.appointment_type)
+            title_lines.append(item.appointment_type)
         
-        # Add appointment for
+        # Add appointment_for with appropriate field based on the type
         if item.appointment_for:
-            title_parts.append(f"For: {item.appointment_for}")
-        
-        # Add provider info based on appointment_for
-        if item.appointment_for == "Practitioner" and item.practitioner_name:
-            title_parts.append(f"Dr: {item.practitioner_name}")
-        elif item.appointment_for == "Department" and item.department:
-            title_parts.append(f"Dept: {item.department}")
-        elif item.appointment_for == "Service Unit" and item.service_unit:
-            title_parts.append(f"Unit: {item.service_unit}")
+            if item.appointment_for == "Practitioner" and item.practitioner_name:
+                title_lines.append(f"Dr: {item.practitioner_name}")
+            elif item.appointment_for == "Department" and item.department:
+                title_lines.append(f"Dept: {item.department}")
+            elif item.appointment_for == "Service Unit" and item.service_unit:
+                title_lines.append(f"Unit: {item.service_unit}")
+            else:
+                title_lines.append(f"For: {item.appointment_for}")
         
         # Add invoice status
-        if item.invoiced:
-            title_parts.append("Invoiced")
+        title_lines.append("Invoiced" if item.invoiced else "Not Invoiced")
         
-        # Join all parts with a separator
-        item.title = " | ".join(title_parts)
+        # Combine all lines with line breaks
+        item.patient = "\n".join(title_lines)
         
         # Add a fallback duration if it's None
         duration = item.duration or 15

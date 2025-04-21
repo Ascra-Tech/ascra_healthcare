@@ -313,6 +313,21 @@ company_data_to_be_ignored = [
 	"Healthcare Service Unit",
 ]
 
+# For the client-side JS that restricts the Patient Appointment list view
+doctype_list_js = {
+    "Patient Appointment": "public/js/patient_appointment_permission.js"
+}
+
+# For the server-side permission check
+has_permission = {
+    "Patient Appointment": "healthcare.healthcare.doctype.patient_appointment.patient_permissions.has_patient_permission"
+}
+
+# For the server-side filtering before fetching records
+permission_query_conditions = {
+    "Patient Appointment": "healthcare.healthcare.doctype.patient_appointment.patient_permissions.get_patient_appointment_permission_query"
+}
+
 fixtures = [
     #"Role",
     #"Role Profile",
