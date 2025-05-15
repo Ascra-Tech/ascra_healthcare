@@ -525,9 +525,13 @@
   {
    "link_doctype": "Discharge Summary",
    "link_fieldname": "inpatient_record"
+  },
+  {
+   "link_doctype": "Service Request",
+   "link_fieldname": "inpatient_record"
   }
  ],
- "modified": "2024-04-30 12:33:23.396599",
+ "modified": "2025-05-15 16:42:32.535161",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
@@ -615,6 +619,7 @@
   }
  ],
  "restrict_to_domain": "Healthcare",
+ "row_format": "Dynamic",
  "search_fields": "patient",
  "sort_field": "modified",
  "sort_order": "DESC",
