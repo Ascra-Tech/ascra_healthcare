@@ -27,6 +27,29 @@ def create_service_request(inpatient_record):
     }
 
 @frappe.whitelist()
+def create_inpatient_medication_order(inpatient_record):
+    """
+    Create a new Inpatient Medication Order from Inpatient Record
+    
+    Args:
+        inpatient_record (str): Name of the Inpatient Record doctype
+    
+    Returns:
+        dict: Information about the created Inpatient Medication Order
+    """
+    if not inpatient_record:
+        frappe.throw(_("Please specify Inpatient Record"))
+    
+    # Get the inpatient record details
+    ip_record = frappe.get_doc("Inpatient Record", inpatient_record)
+    
+    # Return success message
+    return {
+        "success": True,
+        "inpatient_record": inpatient_record
+    }
+
+@frappe.whitelist()
 def create_medication_request(inpatient_record):
     """
     Create a new Medication Request from Inpatient Record
@@ -47,43 +70,6 @@ def create_medication_request(inpatient_record):
     return {
         "success": True,
         "inpatient_record": inpatient_record
-    }
-
-@frappe.whitelist()
-def create_inpatient_medication_entry(inpatient_record):
-    """
-    Create a new Inpatient Medication Entry from Inpatient Record
-    
-    Args:
-        inpatient_record (str): Name of the Inpatient Record doctype
-    
-    Returns:
-        dict: Information about the created Inpatient Medication Entry
-    """
-    if not inpatient_record:
-        frappe.throw(_("Please specify Inpatient Record"))
-    
-    # Get the inpatient record details
-    ip_record = frappe.get_doc("Inpatient Record", inpatient_record)
-    
-    # Check if there are any pending medication orders for this patient
-    # This is optional, but could be useful to notify the user if there are no orders to process
-    pending_orders = frappe.db.sql("""
-        SELECT COUNT(*) 
-        FROM `tabInpatient Medication Order` imo
-        INNER JOIN `tabInpatient Medication Order Entry` imoe
-        ON imo.name = imoe.parent
-        WHERE imo.inpatient_record = %s
-        AND imoe.is_completed = 0
-    """, (inpatient_record), as_dict=0)
-    
-    has_pending_orders = pending_orders and pending_orders[0][0] > 0 if pending_orders else False
-    
-    # Return success message with additional info
-    return {
-        "success": True,
-        "inpatient_record": inpatient_record,
-        "has_pending_orders": has_pending_orders
     }
 
 @frappe.whitelist()
