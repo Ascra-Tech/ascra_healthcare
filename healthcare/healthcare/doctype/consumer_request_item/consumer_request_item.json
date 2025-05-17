@@ -11,6 +11,7 @@
   "item_name",
   "column_break_hsca",
   "schedule_date",
+  "invoiced",
   "section_break_oiej",
   "description",
   "column_break_sobv",
@@ -169,13 +170,20 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Invoiced"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-15 17:49:13.611153",
+ "modified": "2025-05-17 15:34:31.528043",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Consumer Request Item",
