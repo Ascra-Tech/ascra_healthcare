@@ -62,8 +62,9 @@ def create_consumer_request(inpatient_record, request_type):
     if not inpatient_record:
         frappe.throw(_("Please specify Inpatient Record"))
     
+    # Update this validation line to include "Medicine Request"
     if request_type not in ["Consumable Request", "Blood Request", "Medicine Request"]:
-        frappe.throw(_("Invalid request type. Should be 'Consumable Request', 'Blood Request', or 'Medicine Request'"))
+        frappe.throw(_("Invalid request type. Should be 'Consumable Request' or 'Blood Request' or 'Medicine Request'"))
     
     # Get the inpatient record details
     ip_record = frappe.get_doc("Inpatient Record", inpatient_record)
