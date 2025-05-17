@@ -1,5 +1,3 @@
-# apps/healthcare/healthcare/controllers/inpatient_record_requests.py
-
 import frappe
 from frappe import _
 
@@ -13,29 +11,6 @@ def create_service_request(inpatient_record):
     
     Returns:
         dict: Information about the created Service Request
-    """
-    if not inpatient_record:
-        frappe.throw(_("Please specify Inpatient Record"))
-    
-    # Get the inpatient record details
-    ip_record = frappe.get_doc("Inpatient Record", inpatient_record)
-    
-    # Return success message
-    return {
-        "success": True,
-        "inpatient_record": inpatient_record
-    }
-
-@frappe.whitelist()
-def create_inpatient_medication_order(inpatient_record):
-    """
-    Create a new Inpatient Medication Order from Inpatient Record
-    
-    Args:
-        inpatient_record (str): Name of the Inpatient Record doctype
-    
-    Returns:
-        dict: Information about the created Inpatient Medication Order
     """
     if not inpatient_record:
         frappe.throw(_("Please specify Inpatient Record"))
@@ -79,7 +54,7 @@ def create_consumer_request(inpatient_record, request_type):
     
     Args:
         inpatient_record (str): Name of the Inpatient Record doctype
-        request_type (str): Type of request - "Consumable Request" or "Blood Request"
+        request_type (str): Type of request - "Consumable Request", "Blood Request", or "Medicine Request"
         
     Returns:
         dict: Information about the created Consumer Request
@@ -87,8 +62,8 @@ def create_consumer_request(inpatient_record, request_type):
     if not inpatient_record:
         frappe.throw(_("Please specify Inpatient Record"))
     
-    if request_type not in ["Consumable Request", "Blood Request"]:
-        frappe.throw(_("Invalid request type. Should be 'Consumable Request' or 'Blood Request'"))
+    if request_type not in ["Consumable Request", "Blood Request", "Medicine Request"]:
+        frappe.throw(_("Invalid request type. Should be 'Consumable Request', 'Blood Request', or 'Medicine Request'"))
     
     # Get the inpatient record details
     ip_record = frappe.get_doc("Inpatient Record", inpatient_record)

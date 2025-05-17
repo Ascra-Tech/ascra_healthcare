@@ -533,9 +533,13 @@
   {
    "link_doctype": "Inpatient Medication Order",
    "link_fieldname": "inpatient_record"
+  },
+  {
+   "link_doctype": "Consumer Request",
+   "link_fieldname": "inpatient_record"
   }
  ],
- "modified": "2025-05-15 18:34:43.591818",
+ "modified": "2025-05-17 12:14:28.115562",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
