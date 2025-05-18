@@ -59,6 +59,13 @@
   "total",
   "column_break_kpdk",
   "paid_amount",
+  "section_break_wvwj",
+  "show_items",
+  "billables_consumable_requests",
+  "section_break_udsf",
+  "total_consumable_amount",
+  "column_break_tqdt",
+  "consumable_amount_paid",
   "sb_inpatient_occupancy",
   "inpatient_occupancies",
   "btn_transfer",
@@ -510,6 +517,43 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "section_break_wvwj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "billables_consumable_requests",
+   "fieldtype": "Table",
+   "label": "Billables Consumable Requests",
+   "options": "Inpatient Consumable Requests"
+  },
+  {
+   "fieldname": "section_break_udsf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_consumable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Consumable Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tqdt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consumable_amount_paid",
+   "fieldtype": "Currency",
+   "label": "Consumable Amount Paid",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "show_items",
+   "fieldtype": "Button",
+   "label": "Show Items"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -539,7 +583,7 @@
    "link_fieldname": "inpatient_record"
   }
  ],
- "modified": "2025-05-17 12:14:28.115562",
+ "modified": "2025-05-18 15:34:00.208502",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

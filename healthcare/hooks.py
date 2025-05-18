@@ -346,3 +346,10 @@ fixtures = [
     #"Workflow Action Master",
     #"Module Profile",
 ]
+
+# In your hooks.py file
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "healthcare.api.sales_invoice_on_submit"  # Make sure this matches exactly
+    }
+}

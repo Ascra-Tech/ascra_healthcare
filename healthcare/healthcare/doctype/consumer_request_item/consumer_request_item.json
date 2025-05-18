@@ -11,7 +11,10 @@
   "item_name",
   "column_break_hsca",
   "schedule_date",
+  "section_break_lpaj",
   "invoiced",
+  "column_break_ipwz",
+  "qty_invoiced",
   "section_break_oiej",
   "description",
   "column_break_sobv",
@@ -20,11 +23,10 @@
   "image",
   "quantity_and_warehouse_section",
   "qty",
-  "stock_uom",
   "from_warehouse",
   "warehouse",
   "column_break_phna",
-  "uom",
+  "stock_uom",
   "conversion_factor",
   "stock_qty"
  ],
@@ -39,6 +41,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -56,6 +59,7 @@
    "allow_on_submit": 1,
    "bold": 1,
    "columns": 2,
+   "default": "Today",
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -117,6 +121,7 @@
    "width": "80px"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -133,6 +138,7 @@
    "options": "Warehouse"
   },
   {
+   "allow_on_submit": 1,
    "columns": 3,
    "fieldname": "warehouse",
    "fieldtype": "Link",
@@ -145,17 +151,6 @@
   {
    "fieldname": "column_break_phna",
    "fieldtype": "Column Break"
-  },
-  {
-   "columns": 1,
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "UOM",
-   "options": "UOM",
-   "print_width": "70px",
-   "reqd": 1,
-   "width": "70px"
   },
   {
    "fieldname": "conversion_factor",
@@ -172,18 +167,37 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
+   "description": "Item has been invoiced",
    "fieldname": "invoiced",
    "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Invoiced"
+   "label": "Invoiced",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Quantity that has been invoiced",
+   "fieldname": "qty_invoiced",
+   "fieldtype": "Float",
+   "label": "Quantity Invoiced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_lpaj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ipwz",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-17 15:34:31.528043",
+ "modified": "2025-05-18 23:27:42.156773",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Consumer Request Item",
