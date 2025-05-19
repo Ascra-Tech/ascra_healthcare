@@ -109,6 +109,15 @@ def create_sales_invoice_from_service_requests(inpatient_record: str, service_re
         invoice = _create_invoice_from_service_items(inpatient_record_doc, patient_data)
         
         if invoice:
+            # Add service requests to the custom table in the invoice
+            for sr_name in service_requests:
+                invoice.append("custom_service_request", {
+                    "service_requests": sr_name
+                })
+            
+            # Save the invoice to update the child table
+            invoice.save()
+            
             created_invoices.append({
                 "name": invoice.name,
                 "patient": invoice.patient,
@@ -699,36 +708,66 @@ def update_inpatient_record_with_consumer_billables(inpatient_record_name, sales
 
 def sales_invoice_on_submit(doc, method):
     """
-    Update Consumer Request Items when Sales Invoice is submitted
+    Update Consumer Request Items and Service Requests when Sales Invoice is submitted
     """
     try:
-        # Check for references to Consumer Requests
+        # Process Consumer Requests first
         consumer_requests = set()
         for item in doc.items:
             if item.reference_dt == "Consumer Request" and item.reference_dn:
                 consumer_requests.add(item.reference_dn)
         
-        if not consumer_requests:
-            return
+        if consumer_requests:
+            # Process each consumer request
+            for cr_name in consumer_requests:
+                cr = frappe.get_doc("Consumer Request", cr_name)
+                
+                # Update Consumer Request status
+                cr.billing_status = "Invoiced"
+                cr.db_update()
+                
+                # Update all items
+                for item in cr.get("table_hluy", []):
+                    frappe.db.set_value(
+                        "Consumer Request Item",
+                        {"parent": cr_name, "idx": item.idx},
+                        {
+                            "qty_invoiced": item.qty,
+                            "invoiced": 1
+                        }
+                    )
+        
+        # Now process Service Requests from the custom_service_request child table
+        if hasattr(doc, 'custom_service_request') and doc.custom_service_request:
+            service_requests_to_update = [sr.service_requests for sr in doc.custom_service_request if sr.service_requests]
             
-        # Process each consumer request
-        for cr_name in consumer_requests:
-            cr = frappe.get_doc("Consumer Request", cr_name)
-            
-            # Update Consumer Request status
-            cr.billing_status = "Invoiced"
-            cr.db_update()
-            
-            # Update all items
-            for item in cr.get("table_hluy", []):
-                frappe.db.set_value(
-                    "Consumer Request Item",
-                    {"parent": cr_name, "idx": item.idx},
-                    {
-                        "qty_invoiced": item.qty,
-                        "invoiced": 1
-                    }
-                )
+            for sr_name in service_requests_to_update:
+                # Get the service request document
+                sr = frappe.get_doc("Service Request", sr_name)
+                
+                # Update billing status
+                sr.billing_status = "Invoiced"
+                
+                # Calculate qty_invoiced based on invoice items
+                qty_to_invoice = sr.quantity - sr.qty_invoiced
+                sr.qty_invoiced = sr.quantity  # Mark fully invoiced
+                
+                # Save the service request
+                sr.db_update()
+                
+                frappe.db.commit()  # Commit the transaction
+                
+        # Also check references in items (for backward compatibility)
+        service_requests = set()
+        for item in doc.items:
+            if item.reference_dt == "Service Request" and item.reference_dn:
+                service_requests.add(item.reference_dn)
+        
+        if service_requests:
+            for sr_name in service_requests:
+                sr = frappe.get_doc("Service Request", sr_name)
+                sr.billing_status = "Invoiced"
+                sr.db_update()
             
     except Exception as e:
         frappe.log_error(f"Error in sales_invoice_on_submit: {str(e)}", "Sales Invoice Submit Error")
