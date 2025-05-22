@@ -83,7 +83,7 @@ def get_patient_appointment_history(patient):
         'completed_appointments': 0,
         'cancelled_appointments': 0,
         'upcoming_appointments': 0,
-        'total_paid': 0,
+        'total_paid': 0.0,
         'practitioner_appointments': 0,
         'department_appointments': 0,
         'service_unit_appointments': 0,
@@ -95,10 +95,11 @@ def get_patient_appointment_history(patient):
     today = frappe.utils.getdate()
     
     for appointment in appointments:
-        # Check fee validity for this appointment FIRST
+        # Initialize flags
         appointment.has_fee_validity = False
         appointment.fee_validity_info = None
         
+        # Check fee validity for this appointment FIRST
         if not appointment.invoiced and appointment.practitioner:
             # Check if this appointment is covered by fee validity
             fee_validity = frappe.db.sql("""
@@ -162,7 +163,7 @@ def get_patient_appointment_history(patient):
         }
         appointment.status_color = status_colors.get(appointment.status, 'gray')
         
-        # Calculate statistics
+        # Calculate statistics - Fixed logic with explicit counting
         if appointment.status in ['Closed', 'Checked Out']:
             stats['completed_appointments'] += 1
         elif appointment.status == 'Cancelled':
@@ -170,15 +171,20 @@ def get_patient_appointment_history(patient):
         elif appointment.appointment_date >= today and appointment.status not in ['Closed', 'Cancelled', 'No Show']:
             stats['upcoming_appointments'] += 1
             
+        # Payment amount
         if appointment.paid_amount:
             stats['total_paid'] += float(appointment.paid_amount)
             
-        # Payment statistics - Fixed logic
+        # Payment statistics - ensure we count each appointment in exactly one category
+        payment_counted = False
         if appointment.invoiced:
             stats['paid_appointments'] += 1
+            payment_counted = True
         elif appointment.has_fee_validity:
             stats['fee_validity_appointments'] += 1
-        else:
+            payment_counted = True
+        
+        if not payment_counted:
             stats['pending_appointments'] += 1
         
         # Add duration display
@@ -212,6 +218,14 @@ def get_patient_appointment_history(patient):
         appointment.can_create_encounter = appointment.status in ['Checked In', 'Confirmed', 'Open']
         
         processed_appointments.append(appointment)
+    
+    # Ensure all stats are properly set (no None values)
+    for key in stats:
+        if stats[key] is None:
+            stats[key] = 0
+    
+    # Debug logging (remove in production)
+    frappe.logger().debug(f"Appointment stats: {stats}")
     
     # Get patient basic info
     patient_info = frappe.get_doc("Patient", patient)
