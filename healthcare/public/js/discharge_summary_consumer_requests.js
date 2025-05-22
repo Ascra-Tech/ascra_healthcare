@@ -23,7 +23,7 @@ frappe.ui.form.on("Discharge Summary", {
             show_consumer_requests(frm);
         } else {
             // Clear the HTML field if no inpatient record
-            frm.set_df_property('custom_consumable_orders_html', 'options', '');
+            frm.set_df_property('consumable_orders_html', 'options', '');
         }
     }
 });
@@ -34,7 +34,7 @@ var show_consumer_requests = function(frm) {
     }
 
     // Show loading indicator
-    frm.set_df_property('custom_consumable_orders_html', 'options', 
+    frm.set_df_property('consumable_orders_html', 'options', 
         '<div class="text-center" style="padding: 20px;">' +
         '<i class="fa fa-spinner fa-spin"></i> Loading Consumer Requests...' +
         '</div>'
@@ -52,7 +52,7 @@ var show_consumer_requests = function(frm) {
                 render_consumer_requests(frm, response.message);
             } else {
                 // Show message when no consumer requests found
-                frm.set_df_property('custom_consumable_orders_html', 'options',
+                frm.set_df_property('consumable_orders_html', 'options',
                     '<div class="text-center text-muted" style="padding: 20px;">' +
                     '<i class="fa fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>' +
                     '<p>No Consumer Requests found for this patient.</p>' +
@@ -62,7 +62,7 @@ var show_consumer_requests = function(frm) {
         },
         error: function(err) {
             console.error("Error fetching consumer requests:", err);
-            frm.set_df_property('custom_consumable_orders_html', 'options',
+            frm.set_df_property('consumable_orders_html', 'options',
                 '<div class="text-center text-danger" style="padding: 20px;">' +
                 '<i class="fa fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i>' +
                 '<p>Error loading Consumer Requests. Please try again.</p>' +
@@ -74,7 +74,7 @@ var show_consumer_requests = function(frm) {
 
 var render_consumer_requests = function(frm, consumer_requests) {
     if (!consumer_requests || consumer_requests.length === 0) {
-        frm.set_df_property('custom_consumable_orders_html', 'options',
+        frm.set_df_property('consumable_orders_html', 'options',
             '<div class="text-center text-muted" style="padding: 20px;">' +
             '<i class="fa fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>' +
             '<p>No Consumer Requests found for this patient.</p>' +
@@ -245,8 +245,8 @@ var render_consumer_requests = function(frm, consumer_requests) {
     html += `</div>`;
 
     // Add the HTML to the form
-    frm.set_df_property('custom_consumable_orders_html', 'options', html);
-    frm.refresh_field('custom_consumable_orders_html');
+    frm.set_df_property('consumable_orders_html', 'options', html);
+    frm.refresh_field('consumable_orders_html');
 };
 
 // Helper function to get request type color scheme
