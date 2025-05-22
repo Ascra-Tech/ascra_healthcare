@@ -192,56 +192,6 @@ var render_consumer_requests = function(frm, consumer_requests) {
         `;
     });
 
-    // Add summary statistics
-    let total_requests = consumer_requests.length;
-    let pending_statuses = ['Draft', 'Submitted', 'Pending', 'Partially Ordered'];
-    let completed_statuses = ['Received', 'Issued', 'Transferred'];
-    let pending_requests = consumer_requests.filter(r => pending_statuses.includes(r.status)).length;
-    let completed_requests = consumer_requests.filter(r => completed_statuses.includes(r.status)).length;
-    let in_progress_requests = total_requests - pending_requests - completed_requests;
-
-    html += `
-        <div class="row" style="margin-top: 20px;">
-            <div class="col-md-12">
-                <div class="panel panel-info" style="border-radius: 8px; overflow: hidden;">
-                    <div class="panel-heading" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); border: none; color: white;">
-                        <h6 style="margin: 0; font-weight: 600;">
-                            <i class="fa fa-chart-bar"></i> Summary Statistics
-                        </h6>
-                    </div>
-                    <div class="panel-body" style="padding: 20px; background-color: #f8f9fa;">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <div class="stat-box" style="padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 24px; font-weight: bold; color: #007bff; margin-bottom: 5px;">${total_requests}</div>
-                                    <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Total Requests</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-box" style="padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 24px; font-weight: bold; color: #ffc107; margin-bottom: 5px;">${pending_requests}</div>
-                                    <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Pending</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-box" style="padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 24px; font-weight: bold; color: #fd7e14; margin-bottom: 5px;">${in_progress_requests}</div>
-                                    <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">In Progress</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-box" style="padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px;">${completed_requests}</div>
-                                    <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Completed</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
     html += `</div>`;
 
     // Add the HTML to the form
