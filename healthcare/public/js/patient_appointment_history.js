@@ -166,10 +166,29 @@ healthcare.patient_appointment_history = {
         summary_html += '<i class="fa fa-building"></i> ' + data.stats.department_appointments + ' Department';
         summary_html += '</span></div>';
         
-        summary_html += '<div>';
+        summary_html += '<div style="margin-bottom: 8px;">';
         summary_html += '<span class="badge" style="background: rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px;">';
         summary_html += '<i class="fa fa-hospital-o"></i> ' + data.stats.service_unit_appointments + ' Service Unit';
         summary_html += '</span></div>';
+        
+        // Payment breakdown
+        summary_html += '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">';
+        summary_html += '<div style="margin-bottom: 5px;"><small style="color: rgba(255,255,255,0.8); font-size: 10px;">PAYMENT BREAKDOWN</small></div>';
+        summary_html += '<div style="margin-bottom: 5px;">';
+        summary_html += '<span class="badge" style="background: rgba(40,167,69,0.3); color: white; padding: 4px 8px; border-radius: 15px; font-size: 10px; margin-right: 5px;">';
+        summary_html += '<i class="fa fa-check"></i> ' + data.stats.paid_appointments + ' Paid';
+        summary_html += '</span></div>';
+        
+        summary_html += '<div style="margin-bottom: 5px;">';
+        summary_html += '<span class="badge" style="background: rgba(23,162,184,0.3); color: white; padding: 4px 8px; border-radius: 15px; font-size: 10px; margin-right: 5px;">';
+        summary_html += '<i class="fa fa-shield"></i> ' + data.stats.fee_validity_appointments + ' Fee Validity';
+        summary_html += '</span></div>';
+        
+        summary_html += '<div>';
+        summary_html += '<span class="badge" style="background: rgba(255,193,7,0.3); color: white; padding: 4px 8px; border-radius: 15px; font-size: 10px;">';
+        summary_html += '<i class="fa fa-clock-o"></i> ' + data.stats.pending_appointments + ' Pending';
+        summary_html += '</span></div>';
+        summary_html += '</div>';
         summary_html += '</div></div></div>';
         
         summary_html += '</div></div>';
@@ -265,60 +284,102 @@ healthcare.patient_appointment_history = {
             // Payment column
             table_html += '<td style="padding: 12px 8px; vertical-align: middle;">';
             table_html += '<div style="line-height: 1.4;">';
-            let payment_class = appointment.payment_color === 'green' ? 'badge-success' : 'badge-warning';
-            let payment_icon = appointment.payment_color === 'green' ? 'fa-check' : 'fa-clock-o';
-            table_html += '<span class="badge ' + payment_class + '" style="font-size: 10px; padding: 4px 8px; margin-bottom: 4px;">';
+            
+            // Determine payment badge class and icon based on status
+            let payment_class, payment_icon, payment_bg_color;
+            if (appointment.payment_color === 'green') {
+                payment_class = 'badge-success';
+                payment_icon = 'fa-check';
+                payment_bg_color = '#28a745';
+            } else if (appointment.payment_color === 'blue') {
+                payment_class = 'badge-info';
+                payment_icon = 'fa-shield';
+                payment_bg_color = '#17a2b8';
+            } else {
+                payment_class = 'badge-warning';
+                payment_icon = 'fa-clock-o';
+                payment_bg_color = '#ffc107';
+            }
+            
+            table_html += '<span class="badge ' + payment_class + '" style="font-size: 10px; padding: 4px 8px; margin-bottom: 4px; background-color: ' + payment_bg_color + ';">';
             table_html += '<i class="fa ' + payment_icon + '" style="margin-right: 3px;"></i>' + appointment.payment_status + '</span>';
+            
+            // Show amount if paid
             if (appointment.paid_amount) {
                 table_html += '<div style="margin-top: 3px;"><small style="font-weight: 600; color: #28a745;">';
                 table_html += healthcare.patient_appointment_history.format_currency(appointment.paid_amount) + '</small></div>';
             }
+            
+            // Show fee validity info if applicable
+            if (appointment.has_fee_validity && appointment.fee_validity_info) {
+                table_html += '<div style="margin-top: 3px;"><small style="color: #17a2b8; font-size: 10px;">';
+                table_html += '<i class="fa fa-info-circle"></i> Valid till ' + frappe.datetime.str_to_user(appointment.fee_validity_info.valid_till);
+                table_html += '</small></div>';
+            }
+            
             table_html += '</div></td>';
             
-            // Actions column
-            table_html += '<td style="padding: 12px 8px; vertical-align: middle; position: relative;">';
-            table_html += '<div class="dropdown">';
-            table_html += '<button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" style="padding: 4px 8px; border-radius: 15px; border: 1px solid #dee2e6;">';
-            table_html += '<i class="fa fa-ellipsis-v"></i></button>';
-            table_html += '<ul class="dropdown-menu dropdown-menu-right" style="min-width: 180px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 9999;">';
+            // Actions column - Simple Icon Buttons
+            table_html += '<td style="padding: 12px 8px; vertical-align: middle;">';
+            table_html += '<div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">';
             
-            // View Details
-            table_html += '<li><a href="#" onclick="healthcare.patient_appointment_history.view_appointment(\'' + appointment.name + '\')" style="padding: 10px 16px; display: block; text-decoration: none; color: #495057;">';
-            table_html += '<i class="fa fa-eye" style="width: 20px; color: #007bff; margin-right: 8px;"></i> ' + __('View Details') + '</a></li>';
+            // View Details - Always available
+            table_html += '<button onclick="healthcare.patient_appointment_history.view_appointment(\'' + appointment.name + '\')" ';
+            table_html += 'class="btn btn-xs" title="' + __('View Details') + '" ';
+            table_html += 'style="padding: 4px 6px; border: 1px solid #007bff; background: #007bff; color: white; border-radius: 4px; font-size: 11px;">';
+            table_html += '<i class="fa fa-eye"></i></button>';
             
-            // Reschedule (conditional)
+            // Reschedule - Conditional
             if (appointment.can_reschedule) {
-                table_html += '<li><a href="#" onclick="healthcare.patient_appointment_history.reschedule_appointment(\'' + appointment.name + '\')" style="padding: 10px 16px; display: block; text-decoration: none; color: #495057;">';
-                table_html += '<i class="fa fa-calendar" style="width: 20px; color: #17a2b8; margin-right: 8px;"></i> ' + __('Reschedule') + '</a></li>';
+                table_html += '<button onclick="healthcare.patient_appointment_history.reschedule_appointment(\'' + appointment.name + '\')" ';
+                table_html += 'class="btn btn-xs" title="' + __('Reschedule') + '" ';
+                table_html += 'style="padding: 4px 6px; border: 1px solid #17a2b8; background: #17a2b8; color: white; border-radius: 4px; font-size: 11px;">';
+                table_html += '<i class="fa fa-calendar"></i></button>';
             }
             
-            // Create Encounter (conditional)
+            // Create Encounter - Conditional
             if (appointment.can_create_encounter) {
-                table_html += '<li><a href="#" onclick="healthcare.patient_appointment_history.create_encounter(\'' + appointment.name + '\')" style="padding: 10px 16px; display: block; text-decoration: none; color: #495057;">';
-                table_html += '<i class="fa fa-stethoscope" style="width: 20px; color: #28a745; margin-right: 8px;"></i> ' + __('Create Encounter') + '</a></li>';
+                table_html += '<button onclick="healthcare.patient_appointment_history.create_encounter(\'' + appointment.name + '\')" ';
+                table_html += 'class="btn btn-xs" title="' + __('Create Encounter') + '" ';
+                table_html += 'style="padding: 4px 6px; border: 1px solid #28a745; background: #28a745; color: white; border-radius: 4px; font-size: 11px;">';
+                table_html += '<i class="fa fa-stethoscope"></i></button>';
             }
             
-            // View Invoice (conditional)
+            // View Invoice - Conditional
             if (appointment.ref_sales_invoice) {
-                table_html += '<li><a href="#" onclick="healthcare.patient_appointment_history.view_invoice(\'' + appointment.ref_sales_invoice + '\')" style="padding: 10px 16px; display: block; text-decoration: none; color: #495057;">';
-                table_html += '<i class="fa fa-file-text-o" style="width: 20px; color: #6c757d; margin-right: 8px;"></i> ' + __('View Invoice') + '</a></li>';
+                table_html += '<button onclick="healthcare.patient_appointment_history.view_invoice(\'' + appointment.ref_sales_invoice + '\')" ';
+                table_html += 'class="btn btn-xs" title="' + __('View Invoice') + '" ';
+                table_html += 'style="padding: 4px 6px; border: 1px solid #6c757d; background: #6c757d; color: white; border-radius: 4px; font-size: 11px;">';
+                table_html += '<i class="fa fa-file-text-o"></i></button>';
             }
             
-            // View Notes (conditional)
+            // View Notes - Conditional
             if (appointment.notes) {
-                let safe_notes = healthcare.patient_appointment_history.escape_quotes(appointment.notes);
-                table_html += '<li><a href="#" onclick="healthcare.patient_appointment_history.show_notes(\'' + safe_notes + '\')" style="padding: 10px 16px; display: block; text-decoration: none; color: #495057;">';
-                table_html += '<i class="fa fa-sticky-note-o" style="width: 20px; color: #ffc107; margin-right: 8px;"></i> ' + __('View Notes') + '</a></li>';
+                table_html += '<button onclick="healthcare.patient_appointment_history.show_notes(\'' + healthcare.patient_appointment_history.escape_quotes(appointment.notes) + '\')" ';
+                table_html += 'class="btn btn-xs" title="' + __('View Notes') + '" ';
+                table_html += 'style="padding: 4px 6px; border: 1px solid #ffc107; background: #ffc107; color: #212529; border-radius: 4px; font-size: 11px;">';
+                table_html += '<i class="fa fa-sticky-note-o"></i></button>';
             }
             
-            table_html += '</ul></div></td></tr>';
+            table_html += '</div></td></tr>';
         });
 
         table_html += '</tbody></table></div>';
+        
+        // Add payment status legend
         table_html += '<div style="margin-top: 15px; padding: 12px 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #5e72e4;">';
+        table_html += '<div class="row">';
+        table_html += '<div class="col-md-8">';
         table_html += '<small style="color: #6c757d;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #5e72e4;"></i> ';
         table_html += __('Click on any appointment row for quick view, or use the actions menu for specific operations.') + '</small>';
-        table_html += '</div></div>';
+        table_html += '</div>';
+        table_html += '<div class="col-md-4 text-right">';
+        table_html += '<small style="color: #6c757d;"><strong>Payment Status:</strong><br>';
+        table_html += '<span class="badge badge-success" style="margin-right: 5px; font-size: 9px;"><i class="fa fa-check"></i> Paid</span>';
+        table_html += '<span class="badge badge-info" style="margin-right: 5px; font-size: 9px;"><i class="fa fa-shield"></i> Fee Validity</span>';
+        table_html += '<span class="badge badge-warning" style="font-size: 9px;"><i class="fa fa-clock-o"></i> Pending</span>';
+        table_html += '</small></div>';
+        table_html += '</div></div></div>';
 
         dialog.fields_dict.appointments_table.$wrapper.html(table_html);
         

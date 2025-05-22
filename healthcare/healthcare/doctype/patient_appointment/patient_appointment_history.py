@@ -86,12 +86,36 @@ def get_patient_appointment_history(patient):
         'total_paid': 0,
         'practitioner_appointments': 0,
         'department_appointments': 0,
-        'service_unit_appointments': 0
+        'service_unit_appointments': 0,
+        'fee_validity_appointments': 0,
+        'paid_appointments': 0,
+        'pending_appointments': 0
     }
     
     today = frappe.utils.getdate()
     
     for appointment in appointments:
+        # Check fee validity for this appointment FIRST
+        appointment.has_fee_validity = False
+        appointment.fee_validity_info = None
+        
+        if not appointment.invoiced and appointment.practitioner:
+            # Check if this appointment is covered by fee validity
+            fee_validity = frappe.db.sql("""
+                SELECT fv.name, fv.valid_till, fv.status
+                FROM `tabFee Validity` fv
+                WHERE fv.patient = %s 
+                AND fv.practitioner = %s
+                AND fv.status = 'Active'
+                AND %s <= fv.valid_till
+                ORDER BY fv.creation DESC
+                LIMIT 1
+            """, (patient, appointment.practitioner, appointment.appointment_date), as_dict=True)
+            
+            if fee_validity:
+                appointment.has_fee_validity = True
+                appointment.fee_validity_info = fee_validity[0]
+        
         # Determine primary provider based on appointment_for
         if appointment.appointment_for == "Practitioner":
             appointment.primary_provider = appointment.practitioner_name or appointment.practitioner
@@ -148,6 +172,14 @@ def get_patient_appointment_history(patient):
             
         if appointment.paid_amount:
             stats['total_paid'] += float(appointment.paid_amount)
+            
+        # Payment statistics - Fixed logic
+        if appointment.invoiced:
+            stats['paid_appointments'] += 1
+        elif appointment.has_fee_validity:
+            stats['fee_validity_appointments'] += 1
+        else:
+            stats['pending_appointments'] += 1
         
         # Add duration display
         if appointment.duration:
@@ -164,8 +196,15 @@ def get_patient_appointment_history(patient):
             appointment.duration_display = "Not Set"
         
         # Payment status
-        appointment.payment_status = "Paid" if appointment.invoiced else "Pending"
-        appointment.payment_color = "green" if appointment.invoiced else "orange"
+        if appointment.invoiced:
+            appointment.payment_status = "Paid"
+            appointment.payment_color = "green"
+        elif appointment.has_fee_validity:
+            appointment.payment_status = "Free (Fee Validity)"
+            appointment.payment_color = "blue"
+        else:
+            appointment.payment_status = "Pending"
+            appointment.payment_color = "orange"
         
         # Add actions available
         appointment.can_reschedule = appointment.status in ['Scheduled', 'Confirmed', 'Open']
