@@ -432,8 +432,84 @@ def get_pending_invoices(inpatient_record):
 		if doc_name_list:
 			pending_invoices = get_pending_doc(doc, doc_name_list, pending_invoices)
 
+	# NEW: Add Consumer Requests validation
+	consumer_request_issues = validate_consumer_request_billing_for_discharge(inpatient_record)
+	if consumer_request_issues:
+		pending_invoices.update(consumer_request_issues)
+
 	return pending_invoices
 
+
+def validate_consumer_request_billing_for_discharge(inpatient_record):
+	"""
+	Check for unpaid Consumer Requests using Inpatient Record billables data
+	"""
+	try:
+		issues = {}
+		
+		# Check if inpatient record has billables_consumable_requests child table
+		if hasattr(inpatient_record, 'billables_consumable_requests') and inpatient_record.billables_consumable_requests:
+			unpaid_consumer_requests = []
+			
+			for billable in inpatient_record.billables_consumable_requests:
+				# Check if this billable has an unpaid sales invoice
+				if billable.sales_invoice:
+					# Get the sales invoice
+					sales_invoice = frappe.db.get_value(
+						"Sales Invoice", 
+						billable.sales_invoice, 
+						["outstanding_amount", "grand_total", "docstatus"], 
+						as_dict=True
+					)
+					
+					if sales_invoice and sales_invoice.docstatus == 1 and sales_invoice.outstanding_amount > 0:
+						unpaid_consumer_requests.append({
+							"consumer_request": billable.consumer_requests,
+							"invoice": billable.sales_invoice,
+							"outstanding": sales_invoice.outstanding_amount,
+							"total": sales_invoice.grand_total,
+							"request_type": billable.request_type
+						})
+			
+			if unpaid_consumer_requests:
+				invoice_details = []
+				for inv in unpaid_consumer_requests:
+					invoice_details.append(
+						f'<a href="/app/sales-invoice/{inv["invoice"]}" target="_blank">{inv["invoice"]}</a> '
+						f'({inv["consumer_request"]}) - Outstanding: ₹{inv["outstanding"]}'
+					)
+				issues["Unpaid Consumer Request Invoices"] = "<br>".join(invoice_details)
+		
+		# Also check Consumer Requests directly with billing status
+		customer = frappe.db.get_value("Patient", inpatient_record.patient, "customer")
+		if customer:
+			admission_start = inpatient_record.scheduled_date or inpatient_record.admitted_datetime
+			filters = {
+				"customer": customer,
+				"docstatus": 1,
+				"billing_status": ["in", ["Pending", "Partly Invoiced"]]
+			}
+			
+			if admission_start:
+				filters["transaction_date"] = [">=", frappe.utils.getdate(admission_start)]
+
+			unbilled_requests = frappe.get_all(
+				"Consumer Request",
+				filters=filters,
+				fields=["name", "consumer_request_type"]
+			)
+			
+			if unbilled_requests:
+				cr_details = []
+				for cr in unbilled_requests:
+					cr_details.append(f"{cr.name} ({cr.consumer_request_type})")
+				issues["Unbilled Consumer Requests"] = ", ".join(cr_details)
+
+		return issues
+
+	except Exception as e:
+		frappe.log_error(f"Error validating Consumer Request billing: {str(e)}")
+		return {}
 
 def get_pending_doc(doc, doc_name_list, pending_invoices):
 	if doc_name_list:
