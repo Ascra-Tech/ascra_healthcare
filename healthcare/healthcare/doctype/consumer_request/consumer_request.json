@@ -279,6 +279,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "qty_invoiced",
    "fieldtype": "Float",
    "hidden": 1,
@@ -287,6 +288,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Pending",
    "fieldname": "billing_status",
    "fieldtype": "Select",
@@ -305,7 +307,7 @@
    "link_fieldname": "consumer_request"
   }
  ],
- "modified": "2025-05-18 23:53:24.630390",
+ "modified": "2025-05-23 02:01:36.576426",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Consumer Request",
