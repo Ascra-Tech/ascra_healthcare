@@ -44,7 +44,8 @@ app_include_js = "healthcare.bundle.js"
 # include js in doctype views
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
-    "Patient Appointment": "public/js/appointment_type_filters.js"
+    "Patient Appointment": "public/js/appointment_type_filters.js",
+    "Patient Appointment": "public/js/patient_appointment_history.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
