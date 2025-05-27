@@ -44,13 +44,15 @@ app_include_js = "healthcare.bundle.js"
 # include js in doctype views
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
-   "Patient Appointment":"public/js/appointment_type_filters.js",
     # "Patient": "healthcare/Patient_video/patientv.js",
     # "Event":"healthcare/event_video/eventv.js"
+    "Patient Appointment": "public/js/patient_appointment_history.js",
+    "Discharge Summary": "/public/js/discharge_summary_consumer_requests.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+
 
 # Home Pages
 # ----------
@@ -322,6 +324,21 @@ company_data_to_be_ignored = [
 	"Healthcare Service Unit",
 ]
 
+# For the client-side JS that restricts the Patient Appointment list view
+doctype_list_js = {
+    "Patient Appointment": "public/js/patient_appointment_permission.js"
+}
+
+# For the server-side permission check
+has_permission = {
+    "Patient Appointment": "healthcare.healthcare.doctype.patient_appointment.patient_permissions.has_patient_permission"
+}
+
+# For the server-side filtering before fetching records
+permission_query_conditions = {
+    "Patient Appointment": "healthcare.healthcare.doctype.patient_appointment.patient_permissions.get_patient_appointment_permission_query"
+}
+
 fixtures = [
     #"Role",
     #"Role Profile",
@@ -340,3 +357,10 @@ fixtures = [
     #"Workflow Action Master",
     #"Module Profile",
 ]
+
+# In your hooks.py file
+doc_events = {
+    "Sales Invoice": {
+        "on_submit": "healthcare.api.sales_invoice_on_submit"  # Make sure this matches exactly
+    }
+}

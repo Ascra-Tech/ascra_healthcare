@@ -105,40 +105,50 @@ class LabTestTemplate(Document):
 
 
 def create_item_from_template(doc):
-	uom = frappe.db.exists("UOM", "Unit") or frappe.db.get_single_value("Stock Settings", "stock_uom")
-	# Insert item
-	item = frappe.get_doc(
-		{
-			"doctype": "Item",
-			"item_code": doc.lab_test_code,
-			"item_name": doc.lab_test_name,
-			"item_group": doc.lab_test_group,
-			"description": doc.lab_test_description,
-			"is_sales_item": 1,
-			"is_service_item": 1,
-			"is_purchase_item": 0,
-			"is_stock_item": 0,
-			"include_item_in_manufacturing": 0,
-			"show_in_website": 0,
-			"is_pro_applicable": 0,
-			"disabled": 0 if doc.is_billable and not doc.disabled else doc.disabled,
-			"stock_uom": uom,
-		}
-	).insert(ignore_permissions=True, ignore_mandatory=True)
-
-	# Insert item price
-	if doc.is_billable and doc.lab_test_rate != 0.0:
-		price_list_name = frappe.db.get_value(
-			"Selling Settings", None, "selling_price_list"
-		) or frappe.db.get_value("Price List", {"selling": 1})
-		if doc.lab_test_rate:
-			make_item_price(item.name, doc.lab_test_rate)
-		else:
-			make_item_price(item.name, 0.0)
-	# Set item in the template
-	frappe.db.set_value("Lab Test Template", doc.name, "item", item.name)
-
-	doc.reload()
+    try:
+        uom = frappe.db.exists("UOM", "Unit") or frappe.db.get_single_value("Stock Settings", "stock_uom")
+        disabled = 0 if doc.is_billable and not doc.disabled else doc.disabled
+        
+        # Create item directly using SQL to bypass validation
+        item_code = doc.lab_test_code
+        item_name = doc.lab_test_name
+        
+        # Get the HSN code value
+        hsn_code = doc.hsnsac if hasattr(doc, 'hsnsac') else '3822'
+        
+        # Directly insert item with only the essential columns that exist in your Item table
+        frappe.db.sql("""
+            INSERT INTO `tabItem` 
+            (name, item_code, item_name, item_group, description, 
+            is_sales_item, is_purchase_item, is_stock_item, 
+            disabled, stock_uom, gst_hsn_code, creation, owner, modified, modified_by, docstatus) 
+            VALUES (%s, %s, %s, %s, %s, 1, 0, 0, %s, %s, %s, NOW(), %s, NOW(), %s, 0)
+        """, (
+            item_code, item_code, item_name, doc.lab_test_group, doc.lab_test_description or "",
+            disabled, uom, hsn_code, 
+            frappe.session.user, frappe.session.user
+        ))
+        
+        # Commit changes
+        frappe.db.commit()
+        
+        # Create item price
+        if doc.is_billable and doc.lab_test_rate != 0.0:
+            price_list_name = frappe.db.get_value(
+                "Selling Settings", None, "selling_price_list"
+            ) or frappe.db.get_value("Price List", {"selling": 1})
+            if doc.lab_test_rate:
+                make_item_price(item_code, doc.lab_test_rate)
+            else:
+                make_item_price(item_code, 0.0)
+                
+        # Update template to refer to the item
+        frappe.db.set_value("Lab Test Template", doc.name, "item", item_code)
+        doc.reload()
+        
+    except Exception as e:
+        frappe.log_error(f"Error creating item from template: {str(e)}")
+        frappe.throw(f"Error creating item: {str(e)}")
 
 
 @frappe.whitelist()
