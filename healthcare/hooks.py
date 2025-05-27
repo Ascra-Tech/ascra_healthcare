@@ -46,13 +46,14 @@ doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
     # "Patient": "healthcare/Patient_video/patientv.js",
     # "Event":"healthcare/event_video/eventv.js"
+    "Patient Appointment": "public/js/appointment_type_filters.js",
     "Patient Appointment": "public/js/patient_appointment_history.js",
     "Discharge Summary": "/public/js/discharge_summary_consumer_requests.js"
+
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-
 
 # Home Pages
 # ----------
