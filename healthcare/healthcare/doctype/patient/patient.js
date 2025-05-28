@@ -1,9 +1,18 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
-{% include 'healthcare/regional/india/abdm/js/patient.js' %}
-
+// {% include 'healthcare/regional/india/abdm/js/patient.js' %}
+// src="https://meet.jit.si/libs/lib-jitsi-meet.min.js"
 frappe.ui.form.on('Patient', {
 	refresh: function (frm) {
+		
+		// // dynaneshwar
+
+		// frm.add_custom_button(__('Start Jitsi Meeting'), function () {
+        //     startJitsiMeeting(frm);
+        // });
+
+
+		// dynaneshwar
 		frm.set_query('patient', 'patient_relation', function () {
 			return {
 				filters: [
@@ -79,7 +88,52 @@ frappe.ui.form.on('Patient', 'dob', function(frm) {
 		$(frm.fields_dict['age_html'].wrapper).html('');
 	}
 });
+// function startJitsiMeeting(frm) {
+//     console.log("Starting Jitsi Meeting...");
+// }
+// function startJitsiMeeting(frm) {
+//     console.log("Starting Jitsi Meeting...");
 
+//     let roomName = "Meeting-" + frm.doc.name;
+//     let domain = "meet.jit.si";
+
+//     // Ensure moderator joins first with authentication
+//     let moderatorURL = `https://${domain}/${roomName}`;
+
+//     // Open the meeting in a new tab for moderator (e.g., Dnyaneshwar)
+//     window.open(moderatorURL, '_blank');
+
+//     // Open the meeting inside Frappe for the guest user after 5 seconds
+//     setTimeout(() => {
+//         openJitsiMeeting(domain, roomName);
+//     }, 5000);
+// }
+
+// function openJitsiMeeting(domain, roomName) {
+//     let options = {
+//         roomName: roomName,
+//         width: 800,
+//         height: 600,
+//         parentNode: document.getElementById('jitsi-container'), // Make sure this div exists
+//         configOverwrite: {
+//             startWithAudioMuted: true,
+//             startWithVideoMuted: true,
+//             prejoinPageEnabled: false,
+//             disableModeratorIndicator: true,
+//             startScreenSharing: false,
+//             enableLobby: false
+//         },
+//         interfaceConfigOverwrite: {
+//             SHOW_JITSI_WATERMARK: false,
+//             SHOW_POWERED_BY: false
+//         },
+//         userInfo: {
+//             displayName: "Guest User"
+//         }
+//     };
+
+//     const api = new JitsiMeetExternalAPI(domain, options);
+// }
 frappe.ui.form.on('Patient Relation', {
 	patient_relation_add: function(frm){
 		frm.fields_dict['patient_relation'].grid.get_field('patient').get_query = function(doc){

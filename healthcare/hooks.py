@@ -44,9 +44,12 @@ app_include_js = "healthcare.bundle.js"
 # include js in doctype views
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
+    # "Patient": "healthcare/Patient_video/patientv.js",
+    # "Event":"healthcare/event_video/eventv.js"
     "Patient Appointment": "public/js/appointment_type_filters.js",
     "Patient Appointment": "public/js/patient_appointment_history.js",
     "Discharge Summary": "/public/js/discharge_summary_consumer_requests.js"
+
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -139,12 +142,19 @@ doc_events = {
 		"on_trash": "healthcare.healthcare.utils.company_on_trash",
 	},
 	"Patient": {
-		"after_insert": "healthcare.regional.india.abdm.utils.set_consent_attachment_details"
+		"after_insert": "healthcare.regional.india.abdm.utils.set_consent_attachment_details",
+		# "validate":"healthcare.healthcare.Patient_video.patientv.video"
 	},
 	"Payment Entry": {
 		"on_submit": "healthcare.healthcare.custom_doctype.payment_entry.set_paid_amount_in_treatment_counselling",
 		"on_cancel": "healthcare.healthcare.custom_doctype.payment_entry.set_paid_amount_in_treatment_counselling",
 	},
+    # "Patient Appointment":{
+    #     "validate":"healthcare.healthcare.patient_appo.patient_appo.get_jitsi_url"
+	# }
+    # "Event":{
+    #     "validate":"healthcare.healthcare.event_video.eventv.send_mail_on_save"
+	# }
 }
 
 scheduler_events = {
