@@ -456,8 +456,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Billables",
-   "options": "Inpatient Record Item",
-   "read_only": 1
+   "options": "Inpatient Record Item"
   },
   {
    "fieldname": "prescriptions_tab",
@@ -583,7 +582,7 @@
    "link_fieldname": "inpatient_record"
   }
  ],
- "modified": "2025-05-18 15:34:00.208502",
+ "modified": "2025-05-28 18:37:44.619942",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

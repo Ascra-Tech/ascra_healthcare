@@ -223,6 +223,162 @@ class InpatientRecord(Document):
 		except Exception as e:
 			frappe.log_error(message=e, title="Can't bill Service Unit occupancy")
 
+	@frappe.whitelist()
+	def generate_billables_and_invoice(self):
+		"""
+		Enhanced Generate Billables functionality:
+		1. Generate billable items (existing functionality)
+		2. Create Sales Invoice in Draft mode
+		3. Return Sales Invoice name for user feedback
+		"""
+		# Step 1: Generate billable items (existing functionality)
+		self.add_service_unit_rent_to_billable_items()
+		
+		# Step 2: Create Sales Invoice if there are billable items
+		if self.items:
+			sales_invoice_name = create_sales_invoice_from_billables(self)
+			return sales_invoice_name
+		else:
+			frappe.msgprint(_("No billable items found to invoice"))
+			return None
+
+
+def create_sales_invoice_from_billables(inpatient_record):
+	"""
+	Creates a Sales Invoice from Inpatient Record billable items
+	"""
+	# Get customer from patient
+	customer = frappe.db.get_value("Patient", inpatient_record.patient, "customer")
+	if not customer:
+		frappe.throw(_("Customer not found for Patient {0}. Please set customer in Patient record.").format(inpatient_record.patient))
+	
+	# Create Sales Invoice
+	sales_invoice = frappe.new_doc("Sales Invoice")
+	
+	# Set basic details
+	sales_invoice.customer = customer
+	sales_invoice.company = inpatient_record.company
+	sales_invoice.currency = inpatient_record.currency
+	sales_invoice.selling_price_list = inpatient_record.price_list
+	sales_invoice.posting_date = today()
+	sales_invoice.due_date = today()
+	
+	# Add custom field values if they exist
+	if hasattr(sales_invoice, 'patient'):
+		sales_invoice.patient = inpatient_record.patient
+	if hasattr(sales_invoice, 'inpatient_record'):
+		sales_invoice.inpatient_record = inpatient_record.name
+	if hasattr(sales_invoice, 'reference_doctype'):
+		sales_invoice.reference_doctype = "Inpatient Record"
+		sales_invoice.reference_name = inpatient_record.name
+	
+	# Add items from inpatient record that are not yet invoiced
+	items_added = 0
+	for item in inpatient_record.items:
+		if not item.invoiced and item.quantity > 0:
+			invoice_item = sales_invoice.append("items")
+			invoice_item.item_code = item.item_code
+			invoice_item.item_name = item.item_name
+			invoice_item.description = item.item_name
+			invoice_item.qty = item.quantity
+			invoice_item.uom = item.uom
+			invoice_item.rate = item.rate
+			invoice_item.amount = item.amount
+			
+			# Add reference to inpatient record item
+			if hasattr(invoice_item, 'inpatient_record_item'):
+				invoice_item.inpatient_record_item = item.name
+			if hasattr(invoice_item, 'inpatient_record'):
+				invoice_item.inpatient_record = inpatient_record.name
+				
+			items_added += 1
+	
+	if items_added == 0:
+		frappe.msgprint(_("No uninvoiced items found to create Sales Invoice"))
+		return None
+	
+	# Save the Sales Invoice in Draft mode
+	sales_invoice.save()
+	
+	frappe.msgprint(
+		_("Sales Invoice {0} created successfully with {1} items").format(
+			get_link_to_form("Sales Invoice", sales_invoice.name),
+			items_added
+		),
+		title=_("Sales Invoice Created"),
+		indicator="green"
+	)
+	
+	return sales_invoice.name
+
+
+def mark_inpatient_items_invoiced(sales_invoice_name):
+	"""
+	Called when Sales Invoice is submitted to mark corresponding 
+	Inpatient Record Items as invoiced
+	"""
+	try:
+		# Get Sales Invoice
+		sales_invoice = frappe.get_doc("Sales Invoice", sales_invoice_name)
+		
+		# Get linked inpatient record
+		inpatient_record_name = None
+		if hasattr(sales_invoice, 'inpatient_record') and sales_invoice.inpatient_record:
+			inpatient_record_name = sales_invoice.inpatient_record
+		elif hasattr(sales_invoice, 'reference_name') and sales_invoice.reference_doctype == "Inpatient Record":
+			inpatient_record_name = sales_invoice.reference_name
+		
+		if not inpatient_record_name:
+			# Try to find through patient
+			if hasattr(sales_invoice, 'patient') and sales_invoice.patient:
+				inpatient_record_name = frappe.db.get_value("Patient", sales_invoice.patient, "inpatient_record")
+		
+		if not inpatient_record_name:
+			frappe.log_error(f"Could not find Inpatient Record for Sales Invoice {sales_invoice_name}")
+			return
+		
+		# Get the inpatient record
+		inpatient_record = frappe.get_doc("Inpatient Record", inpatient_record_name)
+		
+		# Mark items as invoiced
+		items_updated = 0
+		for invoice_item in sales_invoice.items:
+			# Find matching inpatient record item
+			for ip_item in inpatient_record.items:
+				if (ip_item.item_code == invoice_item.item_code and 
+					not ip_item.invoiced and 
+					ip_item.quantity == invoice_item.qty):
+					
+					ip_item.invoiced = 1
+					ip_item.sales_invoice = sales_invoice_name
+					items_updated += 1
+					break
+		
+		if items_updated > 0:
+			inpatient_record.save()
+			frappe.msgprint(
+				_("Marked {0} items as invoiced in Inpatient Record {1}").format(
+					items_updated, 
+					get_link_to_form("Inpatient Record", inpatient_record_name)
+				),
+				title=_("Items Updated"),
+				indicator="green"
+			)
+		
+	except Exception as e:
+		frappe.log_error(f"Error marking inpatient items as invoiced: {str(e)}")
+
+
+# Sales Invoice hooks - Add these to your hooks.py or create a separate file
+@frappe.whitelist()
+def sales_invoice_on_submit(doc, method):
+	
+	# Check if this is an inpatient-related invoice
+	if (hasattr(doc, 'inpatient_record') and doc.inpatient_record) or \
+	   (hasattr(doc, 'reference_doctype') and doc.reference_doctype == "Inpatient Record") or \
+	   (hasattr(doc, 'patient') and doc.patient):
+		mark_inpatient_items_invoiced(doc.name)
+
 
 @frappe.whitelist()
 def schedule_inpatient(admission_order):

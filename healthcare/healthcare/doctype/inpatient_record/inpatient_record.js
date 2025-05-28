@@ -62,9 +62,7 @@ frappe.ui.form.on('Inpatient Record', {
 				frm.add_custom_button(__("Normal"), function() {
 					transfer_patient_dialog(frm);
 				},__('Transfer'));
-				frm.add_custom_button(__("Generate Billables"), function() {
-					generate_billables(frm);
-				});
+	
 				if (!frm.doc.inpatient_occupancies.some(
 					e => e.transferred_for_procedure == 1 && e.left != 1)) {
 						frm.add_custom_button(__("For Procedure"), function() {
@@ -636,11 +634,22 @@ var create_treatment_counselling = function(frm, args) {
 }
 
 var generate_billables = function(frm) {
-	frappe.call({
-		doc: frm.doc,
-		method: 'add_service_unit_rent_to_billable_items',
-		callback: function() {
-			frm.refresh();
-		}
-	})
+    frappe.call({
+        doc: frm.doc,
+        method: 'generate_billables_and_invoice',  // Changed method name
+        callback: function(data) {
+            if (data.message) {
+                // Sales Invoice was created
+                frappe.msgprint({
+                    title: __('Success'),
+                    message: __('Billables generated and Sales Invoice {0} created successfully', 
+                              [`<a href="/app/sales-invoice/${data.message}" target="_blank">${data.message}</a>`]),
+                    indicator: 'green'
+                });
+            }
+            frm.refresh();
+        },
+        freeze: true,
+        freeze_message: __('Generating Billables and Creating Invoice...')
+    });
 }
