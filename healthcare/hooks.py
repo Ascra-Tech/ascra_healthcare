@@ -354,7 +354,7 @@ fixtures = [
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
-    #"Print Format",
+    "Print Format",
     #"Number Card",
     #"Report",
     #"Workflow Action Master",
