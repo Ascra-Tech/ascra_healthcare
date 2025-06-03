@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 // If you need to include additional JS, use import or require if supported, or add a <script> tag in your HTML.
 
-// import 'healthcare/regional/india/abdm/js/patient.js';
+// import 'healthcare/regional/india/abdm/js/patient.js'; commented by Amit kumar on 2023-10-20
 
 
 frappe.ui.form.on('Patient', {
