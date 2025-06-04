@@ -1,10 +1,12 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
-// {% include 'healthcare/regional/india/abdm/js/patient.js' %}
-// src="https://meet.jit.si/libs/lib-jitsi-meet.min.js"
+// If you need to include additional JS, use import or require if supported, or add a <script> tag in your HTML.
+
+// import 'healthcare/regional/india/abdm/js/patient.js'; commented by Amit kumar on 2023-10-20
+
+
 frappe.ui.form.on('Patient', {
 	refresh: function (frm) {
-		
 		frm.set_query('patient', 'patient_relation', function () {
 			return {
 				filters: [
