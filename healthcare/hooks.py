@@ -44,8 +44,8 @@ app_include_js = "healthcare.bundle.js"
 # include js in doctype views
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
-  	# "Patient Appointment":"public/js/appointment_type_filters.js",
-    # "Patient": "healthcare/Patient_video/patientv.js",
+  	"Patient Appointment":"public/js/appointment_type_filters.js",
+    # "Patient":"healthcare/regional/india/abdm/js/patient.js",
     # "Event":"healthcare/event_video/eventv.js"
 
     "Patient Appointment": "public/js/appointment_type_filters.js",
@@ -360,7 +360,7 @@ fixtures = [
     #"Workflow Action Master",
     #"Module Profile",
 	{"dt": "Letter Head", "filters" :[
-        ["name","in",["ascratech logo"]]]},
+        ["name","in",["ascratech logo","Discharge Summary"]]]},
 ]
 
 # In your hooks.py file
