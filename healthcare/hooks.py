@@ -367,5 +367,11 @@ fixtures = [
 doc_events = {
     "Sales Invoice": {
         "on_submit": "healthcare.api.sales_invoice_on_submit"  # Make sure this matches exactly
-    }
+    },
+    "Patient Encounter": {
+		"on_submit": "healthcare.healthcare.event_video.patient_encounter.on_submit",
+	},
+	"*":{
+		"on_submit":"healthcare.healthcare.custom_doctype.p_h_s.create_medical_record"
+	}
 }
