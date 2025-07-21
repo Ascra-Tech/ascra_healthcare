@@ -983,6 +983,7 @@ let make_payment = function (frm, automate_invoicing) {
 						"discount_amount": values.discount_amount
 					},
 					callback: async function (data) {
+						console.log("hide --------------------")
 						if (!data.exc) {
 							await frm.reload_doc();
 							if (frm.doc.ref_sales_invoice) {
@@ -991,6 +992,7 @@ let make_payment = function (frm, automate_invoicing) {
 								d.get_field("discount_amount").$input.prop("disabled", true);
 								d.get_primary_btn().attr("disabled", true);
 								d.get_secondary_btn().attr("disabled", false);
+								d.hide();
 							}
 						}
 					}
